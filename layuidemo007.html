@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- 要是用layui, 需要引入 1个js  和 1 css -->
+    <script src="layui-v2.5.6/layui/layui.js"></script>
+    <link rel="stylesheet" href="layui-v2.5.6/layui/css/layui.css">
+</head>
+
+<body>
+
+<!--我是修改-->
+<script type="text/html" id="updateHtml">
+    <form class="layui-form  layui-form-pane" action="" onsubmit="return false">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <input type="text" name=""  placeholder="请输入姓名" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">年龄</label>
+            <div class="layui-input-inline">
+                <input type="text" name=""  placeholder="请输入年龄" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否神仙</label>
+            <div class="layui-input-inline">
+                <input type="radio" name="shen" value="神仙" title="神仙" checked="">
+                <input type="radio" name="shen" value="凡人" title="凡人">
+                <!--<input type="radio" name="sex" value="禁" title="禁用" disabled="">-->
+            </div>
+        </div>
+
+        <!--下面应该有 提交 或者 返回按钮-->
+
+
+    </form>
+
+</script>
+
+
+
+<!--加上一个搜索狂-->
+<form class="layui-form  layui-form-pane" action="" onsubmit="return false">
+    <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-inline">
+            <input type="text" name=""  placeholder="请输入姓名" class="layui-input">
+        </div>
+
+        <label class="layui-form-label">年龄</label>
+        <div class="layui-input-inline">
+            <select name="">
+                <option value="1">100岁以下</option>
+                <option value="2" selected="">100岁以上</option>
+            </select>
+        </div>
+
+        <label class="layui-form-label">是否神仙</label>
+        <div class="layui-input-inline">
+            <input type="radio" name="shen" value="神仙" title="神仙" checked="">
+            <input type="radio" name="shen" value="凡人" title="凡人">
+            <!--<input type="radio" name="sex" value="禁" title="禁用" disabled="">-->
+        </div>
+
+        <div class="layui-input-inline">
+        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+         </div>
+    </div>
+
+</form>
+
+
+<!-- 数据表格如何用呢? 第一步,拷贝一个 html  table 标记 -->
+<table class="layui-hide" id="test" lay-filter="test"></table>
+
+
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+        <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+    </div>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+
+<script>
+    layui.use(['form', 'table', 'util', 'jquery'], function (args) {
+        var form = layui.form;
+        var table = layui.table;
+        var util = layui.util;
+        var $ = layui.jquery;
+
+        // table.render 是渲染 上面的 table 表格
+        table.render({
+            elem: '#test'
+            // , url: '/test/table/demo1.json'
+            , url: '/LayuiServlet'
+            , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                , layEvent: 'LAYTABLE_TIPS'
+                , icon: 'layui-icon-tips'
+            }]
+            , title: '用户数据表'
+            , cols: [[
+                {type: 'checkbox', fixed: 'left'}
+
+                // , {
+                //     field: 'email', title: '邮箱', width: 150, edit: 'text', templet: function (res) {
+                //         return '<em>' + res.email + '</em>'
+                //     }
+                // }
+                , {field: 'id', title: '序号', width: 80, edit: 'text', sort: true}
+                , {field: 'name', title: '姓名', width: 100}
+                , {
+                    field: 'age', title: '年龄', width: 100, templet: function (d) {
+                        // 如果年龄大于100岁 变红
+                        var age = d.age;
+                        if (age >= 100) {
+                            return "<span style='color: red' > " + age + " </span>   "
+
+                        } else {
+                            return "<span> " + age + " </span>   "
+                        }
+
+                    }
+                }
+                , {
+                    field: 'birthday', title: '出生日期', width: 160, templet: function (d) {
+                        console.log(d)
+                        // d 就是 这一行数据, 那到这个数据就可以 进行一个 修改.
+                        // 下面的任务是 把  d.birthday 修改成  人看的懂的 日期
+                        //   util.toDateString(d.birthday, "yyyy-MM-dd HH:mm:ss");
+                        return util.toDateString(d.birthday, "yyyy-MM-dd HH:mm:ss");
+                    }
+                }
+                , {
+                    field: 'shen', title: '是否是神仙', width: 150, templet: function (d) {
+                        if (d.shen) {
+                            return "  <input type=\"checkbox\" checked=\"\" name=\"open\" lay-skin=\"switch\" lay-filter=\"switchTest\" lay-text=\"神仙|凡人\"   value='神仙' >"
+                        } else {
+                            return "  <input type=\"checkbox\"              name=\"close\" lay-skin=\"switch\" lay-filter=\"switchTest\"  lay-text=\"神仙|凡人\"  value='凡人' >"
+                        }
+                    }
+                }
+                , {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 150}
+
+            ]]
+            , page: true
+        });
+
+
+//头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'getCheckData':
+                    var data = checkStatus.data;
+                    layer.alert(JSON.stringify(data));
+                    break;
+                case 'getCheckLength':
+                    var data = checkStatus.data;
+                    layer.msg('选中了：' + data.length + ' 个');
+                    break;
+                case 'isAll':
+                    layer.msg(checkStatus.isAll ? '全选' : '未全选');
+                    break;
+
+                //自定义头工具栏右侧图标 - 提示
+                case 'LAYTABLE_TIPS':
+                    layer.alert('这是工具栏右侧自定义的一个图标按钮');
+                    break;
+            }
+            ;
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function (obj) {
+            var data = obj.data;
+            //console.log(obj)
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                layer.open({
+                    title:'编辑',
+                    area: ['600px', '600px'],
+                    type: 1,
+                  //  content: '<h1>你好世界..</h1>' // 一般不吧html写在这里
+                    content: $("#updateHtml").html() ,
+                    success:function (layero, index) {
+                        console.log(layero)
+                        console.log(index)
+                        console.log(" 我是 layer 弹出成功后的回调")
+                        form.render();  // 重点:强调: 当界面发生改变时, 记得 重新渲染模块,不然不显示效果
+                    },
+                    btn:['确定修改','取消修改','其他1','其他2'],
+                    yes:function (index, layero) {
+                           alert("向后台发送了ajax")
+                        return false;  //开启该代码可禁止点击该按钮关闭
+                    },
+                    btn2:function (index, layero) {
+                        alert("我取消了修改")
+                        return false;  //开启该代码可禁止点击该按钮关闭
+                    }
+                });
+
+                // layer.prompt({
+                //     formType: 2
+                //     , value: data.email
+                // }, function (value, index) {
+                //     obj.update({
+                //         email: value
+                //     });
+                //     layer.close(index);
+                // });
+            }
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function (data) {
+            //console.log(data)
+            // console.log(data.othis)
+            var x = this.checked ? true : false;
+            console.log(x)
+            if (x) {
+                console.log("神仙,,,,true")
+                data.value = "神仙"
+                console.log(data.value)
+            } else {
+                //  data.othis.value("凡人")
+                //   data.value("凡人")
+                //console.log($(data))
+                console.log("fanren,,,,else")
+
+                data.value = "凡人"
+                console.log(data.value)
+            }
+            $.ajax({
+                url: '/ShenServlet',
+                type: 'post',
+                data: {
+                    "shen": data.othis.text()
+                },
+                dataType: 'json',
+                success: function (res) {
+                    //console.log(res)
+                }
+            });
+
+            layer.msg('开关checked：' + (this.checked ? 'true' : 'false'), {
+                offset: '6px'
+            });
+            //    layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+        });
+    });
+
+</script>
+
+</body>
+
+</html>
