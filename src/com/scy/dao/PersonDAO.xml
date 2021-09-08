@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace:映射文件的命名空间，规范是映射文件的全路径-->
+<!--作用：是一个路径，用来查找下面的id-->
+ <mapper namespace="com.scy.dao.PersonDao">
+    <resultMap id="BaseResultMap" type="com.scy.bean.Person">
+        <!--下面的标签映射实现实体类-->
+        <!--id只有一个-->
+        <!--colimn是数据库中的列名   很多是   下划线-->
+        <!--property是实体类中的属性   一般是驼峰-->
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="gender" property="gender" />
+        <result column="birthday" property="birthday" />
+        <result column="address" property="address" />
+        <result column="score" property="score" />
+    </resultMap>
+<!--SQL 片段-->
+    <sql id="allColumn">
+      id,name,gender,birthday,address
+
+    </sql>
+    <!--隐藏生日的SQL片段-->
+    <sql id="birthdayColumn">
+      id,name,gender,birthday,address
+
+    </sql>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select * from person
+    </select>
+
+
+    <!--SQL 语句中携带参数  其实就是指的 where 语句 parameterType Parmeter:参数的 type 类型 （int， string ，map，set  ，list）-->
+    <!--select * from person  where  gender = 2-->
+        <select id="selectPersonBySex" resultMap="BaseResultMap" parameterType="int">
+            select  <include refid="birthdayColumn"/> from  person where  gender = #{sex}
+        </select>
+
+    <!--select count（*）from person -->
+
+    <select id="selectCount" resultType="long">
+        select  count(*) from person
+    </select>
+    <!--查询女生总条数有几个: select count(*) from person where sex=2 and score>100-->
+    <!--当前端 传来多个参数的时候 你需要看这几个参数 是否是同一个类中的属性-->
+    <!--如果是 那么直接可以用这个类做参数，-->
+    <!--如果 不是 同一个 类中的（这个对应的是多表！） 那么 可以手写一个参数的实体类（DTO） 或者 使用map做参数-->
+
+    <select id="selectCountByParam01" resultType="long" parameterType="com.scy.bean.Person">
+        select count(*) from  person where gender = #{gender} and  score> #{score}
+
+    </select>
+    <!--查询性别是 2 且 生日是大于2020-09-07的 人有哪些？-->
+    <!--select * from person gender = #{gender} and birthday>= #{birthday}-->
+    <select id="selectCountByParam02" resultMap="BaseResultMap" parameterType="map">
+
+        <![CDATA[select * from person where gender=#{gender} and birthday<#{birthday}]]>
+    </select>
+    <!--//分组查询 男生和女生的平均分值各是多少select gender,avg(score)as avgScore from person GROUP BY gender;-->
+    <select id="selectAvgScore" resultType="com.scy.bean.dto.PersonDTO">
+        select gender,avg(score)as avgScore from person GROUP BY gender
+    </select>
+    <!--//分组查询 男生和女生的平均分值 大于200 的是什么 -->
+    <!--select gender,avg(score)as avgScore from person GROUP BY gender having avg(score) > 200-->
+    <select id="selectAvgScoreParam" resultType="com.scy.bean.dto.PersonDTO" parameterType="int">
+select gender,avg(score)as avgScore from person GROUP BY gender having avg(score) > #{score}
+
+    </select>
+
+    <!--用map 可以接收 任何的数据常见于多表-->
+    <select id="selectAvgScoreParam02" resultType="map" parameterType="int">
+        select gender,avg(score)as avgScore from person GROUP BY gender having avg(score) > #{score}
+
+    </select>
+ <!--模糊查询  查询 姓孙的-->
+
+    <!--select * from person where name like '孙%' 第一种方式 ： 使用 ￥ 去拼接 但是 这样不好 因为是拼接的 SQL 编译的时候没有？ 荣耀被黑客注入不安全-->
+   <select id="selectPersonByLike" resultMap="BaseResultMap" parameterType="string">
+       select * from person where name like   '${name}%'
+   </select>
+    <!--select * from person where name like '孙%' 第二种方式 ： 使用 sql 语句concat连接 是可以编译的 可以用这中 -->
+    <select id="selectPersonByLike02" resultMap="BaseResultMap" parameterType="String">
+       select * from person where name like   concat ('%',#{name},'%')
+   </select>
+
+    <!--//查询 第三种 谢欣最爱-->
+    <select id="selectPersonByLike03" resultMap="BaseResultMap" parameterType="string">
+         select * from person where name like   concat ('%',#{name},'%')
+    </select>
+    <!--//增加一条数据 insert into person（id ,name, gender ,birthday ,address ,score）value( null {#name})-->
+    <insert id="insertPerson" parameterType="com.scy.bean.Person">
+        insert into person (id,name,gender,birthday,address,score)
+        values(null,#{name},#{gender},#{birthday},#{address},#{score})
+    </insert>
+
+
+    <select id="selectScore01" resultType="map" parameterType="int">
+   select b.s_id,b.s_name,ROUND(AVG(a.s_score),2) as avg_score from
+    student b
+    join score a on b.s_id = a.s_id
+    GROUP BY b.s_id,b.s_name HAVING ROUND(AVG(a.s_score),2)>=60;
+    </select>
+
+    <select id="selectTeacher" resultMap="BaseResultMap" parameterType="string">
+        select count(t_id) from teacher where t_name like '李%';
+    </select>
+    <select id="selectStudent" resultMap="BaseResultMap" parameterType="int">
+         select a.* from
+    student a,score b,score c
+    where a.s_id = b.s_id  and a.s_id = c.s_id and b.c_id='01' and c.c_id='02';
+
+    </select>
+    <select id="select02" resultType="map" parameterType="map">
+    <![CDATA[ select s.*,s1.s_score 1score,s2.s_score 2score from student s,Score s1,Score s2 where s.s_id=s1.s_id and s.s_id=s2.s_id and s1.c_id=#{c_id1} and s2.c_id=#{c_id2} and s1.s_score < s2.s_score ]]>
+    </select>
+    <select id="select03" resultType="map" parameterType="int">
+        select s.s_id,s.s_name,avg(s2.s_score) avgSc from Student s,Score s2 where s.s_id=s2.s_id group by s2.s_id HAVING avg(s2.s_score) >=#{s2.s_score}
+
+    </select>
+    <select id="select04" resultType="map" parameterType="map">
+
+        <![CDATA[ select s.s_id,s.s_name,avg(s2.s_score) avgSc from Student s,Score s2 where s.s_id=s2.s_id group by s2.s_id HAVING avg(s2.s_score) <= #{s2.s_score}  ]]>
+    </select>
+
+
+<select id="select05" resultType="map">
+       select s.s_id,s.s_name,count(s2.c_id) as '选课总数',sum(s2.s_score) as '总成绩' from Student s,Score s2 where s.s_id=s2.s_id GROUP BY s2.s_id
+    </select>
+
+<select id="select06" resultType="Integer" parameterType="string">
+        select count(*) from Teacher where t_name like #{t_name}"%"
+    </select>
+
+<select id="select07" resultType="map" parameterType="string">
+        select s.* from Student s,Score s2,Course c,Teacher t where s.s_id=s2.s_id and c.c_id=s2.c_id and t.t_id=c.t_id and t.t_name = #{t.t_name}
+    </select>
+
+<select id="select08" resultType="map" parameterType="string">
+      select s.* from Student s,Teacher t,Score s2 where s.s_id=s2.s_id and t.t_id=s2.c_id and s.s_name not in(select Student.s_name from Student,Teacher,Score  where Student.s_id=Score.s_id and Teacher.t_id=Score.c_id and Teacher.t_name= #{Teacher.t_name})
+       </select>
+
+<!--//删除一条数据-->
+    <delete id="deletePersonById" parameterType="int">
+        delete  from  person  where  id=#{id}
+    </delete>
+<!--//增加一条数据 表-->
+    <!--场景 学生多 班级1 当我 张三 李四 王五 学生表 大数据班级表-->
+    <!--插入数据之后 自动上报我们 主键 ID-->
+    <!--selectKey 一般多表 联查 插入的时候 需要获取刚刚插入的数据的主键ID 的时候用的到-->
+    <!--keyProperty 是指的 主键的 ID-->
+    <!--order 是指的 自增的主键 是 数据插入后诞生的还是插入前诞生的 MySQL after oracle前-->
+    <!--resultType 主键 ID 的 数据类型 一般 int 分布式 string 雪花算法-->
+    <!--select LAST _INSERT _ID() 查询最后插入的主键ID-->
+    <insert id="insertPerson" parameterType="com.scy.bean.Person">
+<selectKey keyProperty="id" order="AFTER" resultType="int">
+    select LAST _INSERT _ID()
+</selectKey>
+        insert into person (id,name,gender,birthday,address,score)
+        values(null,#{name},#{gender},#{birthday},#{address},#{score})
+    </insert>
+
+    <!--动态sql之动态查询 通俗讲select+if判断-->
+    <!--动态sql有9个  第一个where，1.删除第一个and   2.代替了原始sql中的where，where常和if搭配-->
+    <!--where里需要把方法里的参数（map，实体类）的属性写全-->
+    <!--if的注意事项 test="gender 是指的实体类中的属性，驼峰的-->
+    <select id="dongTaiSelect" resultMap="BaseResultMap" parameterType="com.scy.bean.Person">
+        select * from person p
+        <where>
+            <if test="id != null and id !='' ">
+                p.id =#{id}
+            </if>
+            <if test="name != null and name !='' ">
+                and p.name =#{name}
+            </if>
+            <if test="gender != null and gender !='' ">
+                and p.gender =#{gender}
+            </if>
+            <if test="birthday != null and birthday !='' ">
+                and p.birthday =#{birthday}
+            </if>
+            <if test="address != null and address !='' ">
+                and p.address =#{address}
+            </if>
+            <if test="score != null and score !='' ">
+                and p.score >#{score}
+            </if>
+        </where>
+    </select>
+
+    <!--动态修改 updata person set xx=xx where id=?-->
+    <update id="dongTaiUpdate" parameterType="com.scy.bean.Person">
+        update person p <set>
+        <if test="name != null and name !='' ">
+            p.name =#{name},
+        </if>
+        <if test="gender != null and gender !='' ">
+            p.gender =#{gender},
+        </if>
+        <if test="birthday != null  ">
+            p.birthday =#{birthday},
+        </if>
+        <if test="address != null and address !='' ">
+            p.address =#{address},
+        </if>
+        <if test="score != null and score !='' ">
+            p.score >#{score}
+        </if>
+    </set>
+        where p.id=#{id}
+    </update>
+    <!--批量删除-->
+    <!--delete from person where id in(1,2,3,4)-->
+    <!--(1,2,3,4)把当作一个集合看待 ids-->
+    <delete id="piLingDel" parameterType="map">
+        delete from person where id in
+        <foreach collection="ids" open="(" item="id" separator="," close=")" index="index">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
