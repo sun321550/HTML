@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-4.0.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+            http://www.springframework.org/schema/mvc
+            http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+            http://www.springframework.org/schema/task
+            http://www.springframework.org/schema/task/sping-task-4.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-4.0.xsd
+            http://www.springframework.org/schema/security
+    		http://www.springframework.org/schema/security/spring-security.xsd">
+    <!--配置springmvc的文件，包含 网站跳转！的逻辑相关的控制和配置 -->
+    <!--注解扫描 -->
+    <context:component-scan  base-package="controller"/>
+    <mvc:annotation-driven/>
+    <!--  配置拦截器 -->
+
+    <!-- <mvc:interceptors>
+            <mvc:interceptor>
+                <mvc:mapping path="/admin/**"/>
+                <mvc:exclude-mapping path="/admin/loginFunction"/>
+                <bean class="com.xiexin.interceptor.LoginInterceptor"></bean>
+            </mvc:interceptor>
+        </mvc:interceptors>-->
+
+
+    <!--配置视图解析器 -->
+    <bean
+            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--<property name="prefix" value="/WEB-INF/jsp/"></property>-->
+        <property name="prefix" value="/WEB-INF/pages/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <!-- 配置springmvc不能处理的请求交给tomcat -->
+    <!-- <mvc:default-servlet-handler/> -->
+    <!--配置注解驱动，适用于更高级的注解的功能 -->
+
+    <!-- 注解驱动:处理器适配器和处理器映射器 -->
+    <!--<mvc:annotation-driven conversion-service="conversionService"/>-->
+    <!-- 自定义类型转换器 -->
+    <!--<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">-->
+        <!--<property name="converters">-->
+            <!--<set>-->
+                <!--<bean class="com.xiexin.converter.StringToDateConverter"></bean>-->
+            <!--</set>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!-- 对静态资源文件的访问 -->
+    <!-- <mvc:resources mapping="/img/**" location="/WEB-INF/img/" /> -->
+    <!-- <mvc:resources mapping="/js/**" location="/WEB-INF/js/" /> -->
+    <!-- 静态资源配置 -->
+    <!--<mvc:resources mapping="/res/**" location="/WEB-INF/res/" />-->
+    <mvc:resources mapping="/res/**" location="/WEB-INF/res/" />
+
+    <!-- 静态资源全部放行 -->
+    <mvc:default-servlet-handler/>
+    <!-- aop的自动代理proxy-target-class属性值决定是基于接口的还是基于类的代理被创建。
+    如果proxy-target-class 属性值被设置为true，那么基于类的代理将起作用（这时需要cglib库）。
+    如果proxy-target-class属值被设置为false或者这个属性被省略，那么标准的JDK 基于接口的代理将起作用 -->
+    <aop:aspectj-autoproxy proxy-target-class="false"/>
+    <!--<bean id="logAopAction" class="com.hp.util.LogAopAction"/>-->
+    <!--配置开启security的注解支持-->
+    <!--<security:global-method-security secured-annotations="enabled"/>-->
+
+
+    <!-- 上传文件 -->
+    <!--   <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+       <property name="defaultEncoding" value="utf-8"/>    -->
+    <!-- 最大内存大小 -->
+    <!--    <property name="maxInMemorySize" value="10240"/>   -->
+    <!-- 最大文件大小，-1为不限制大小     value="204800"  1024*200即200k     -->
+    <!--    <property name="maxUploadSize" value="20480000"/>    -->
+    <!--   </bean>-->
+
+
+    <!-- 接口跨域配置 -->
+    <!--<mvc:cors>
+        <mvc:mapping path="/**"
+                     allowed-origins="*"
+                     allowed-methods="POST, GET, OPTIONS, DELETE, PUT"
+                     allowed-headers="Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+                     allow-credentials="true" />
+    </mvc:cors>
+-->
+    <!--<import resource="spring-redis.xml"></import>-->
+
+</beans>
